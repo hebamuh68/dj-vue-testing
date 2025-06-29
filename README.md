@@ -1,101 +1,37 @@
-# The Practical Test Pyramid: Spring Boot Edition
+# Django + Vue.js Full-Stack Testing Project
 
-[![Build Status](https://circleci.com/gh/hamvocke/spring-testing/tree/main.svg?style=svg)](https://circleci.com/gh/hamvocke/spring-testing/tree/main)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
+[![Django](https://img.shields.io/badge/Django-4.2+-green.svg)](https://djangoproject.com)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.0+-4FC08D.svg)](https://vuejs.org)
+[![Pytest](https://img.shields.io/badge/Pytest-7.4+-orange.svg)](https://pytest.org)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-This repository contains a *Spring Boot* application with lots of test examples on different levels of the [Test Pyramid](https://martinfowler.com/bliki/TestPyramid.html). It shows an opinionated way to thoroughly test your spring application by demonstrating different types and levels of testing. You will find that some of the tests are duplicated along the test pyramid -- concepts that have already been tested in lower-level tests will be tested in more high-level tests. This contradicts the premise of the test pyramid. In this case it helps demonstrating different kinds of tests which is the main goal of this repository.
+A comprehensive full-stack web application demonstrating modern testing practices with Django backend and Vue.js frontend. This project showcases the **Test Pyramid** approach with unit, integration, and functional tests.
 
-## Read the Blog Post
-This repository is part of a [blog posts](https://martinfowler.com/articles/practical-test-pyramid.html) I wrote about test automation and the test pyramid. I highly recommend you read it to get a better feeling for the purpose of the different kinds of tests in this repository and how you can implement a reliable test suite for a Spring Boot application.
-
-## Get started
-
-### 1. Set an API Key as Environment Variable
-In order to run the service, you need to set the `WEATHER_API_KEY` environment variable to a valid API key retrieved from ~~darksky.net~~ [openweathermap.org](https://openweathermap.org/).
-
-_Note: in a previous version this example used darksky.net as the weather API. Since they've shut down their API for public access, we've since switched over to openweathermap.org_
-
-A simple way is to rename the `env.sample` file to `.env`, fill in your API key from _openweathermap.org_ and source it before running your application:
-
-```bash
-source .env
-```
-
-### 2. Start a PostgreSQL database
-The easiest way is to use the provided `startDatabase.sh` script. This script starts a Docker container which contains a database with the following configuration:
-    
-  * port: `15432`
-  * username: `testuser`
-  * password: `password`
-  * database name: `postgres`
-  
-If you don't want to use the script make sure to have a database with the same configuration or modify your `application.properties`.
-
-### 3. Run the Application
-Once you've provided the API key and started a PostgreSQL database you can run the application using
-
-```bash
-./gradlew bootRun
-```
-
-The application will start on port `8080` so you can send a sample request to `http://localhost:8080/hello` to see if you're up and running.
-
-
-## Application Architecture
+## 🏗️ Project Architecture
 
 ```
- ╭┄┄┄┄┄┄┄╮      ┌──────────┐      ┌──────────┐
- ┆   ☁   ┆  ←→  │    ☕     │  ←→  │    💾     │
- ┆  Web  ┆ HTTP │  Spring  │      │ Database │
- ╰┄┄┄┄┄┄┄╯      │  Service │      └──────────┘
-                └──────────┘
-                     ↑ JSON/HTTP
-                     ↓
-                ┌──────────┐
-                │    ☁     │
-                │ Weather  │
-                │   API    │
-                └──────────┘
+┌─────────────────┐    HTTP/REST    ┌─────────────────┐    HTTP/REST    ┌─────────────────┐
+│   Vue.js        │ ←────────────→ │   Django        │ ←────────────→ │   PostgreSQL    │
+│   Frontend      │                │   Backend       │                │   Database      │
+│                 │                │                 │                │                 │
+│ • Components    │                │ • REST API      │                │ • Person Data   │
+│ • State Mgmt    │                │ • Models        │                │ • Weather Data  │
+│ • Routing       │                │ • Serializers   │                │                 │
+│ • Testing       │                │ • Testing       │                │                 │
+└─────────────────┘                └─────────────────┘                └─────────────────┘
+         │                                   │                                   │
+         │                                   │                                   │
+         └─────────── E2E Tests ─────────────┴─────────── Integration ──────────┘
 ```
 
-The sample application is almost as easy as it gets. It stores `Person`s in an in-memory database (using _Spring Data_) and provides a _REST_ interface with three endpoints:
+## 🧪 Testing Strategy
 
-  * `GET /hello`: Returns _"Hello World!"_. Always.
-  * `GET /hello/{lastname}`: Looks up the person with `lastname` as its last name and returns _"Hello {Firstname} {Lastname}"_ if that person is found.
-  * `GET /weather`: Calls a downstream [weather API](https://openweathermap.org/current#name) via HTTP and returns a summary for the current weather conditions in Hamburg, Germany
-
-### Internal Architecture
-The **Spring Service** itself has a pretty common internal architecture:
-
-  * `Controller` classes provide _REST_ endpoints and deal with _HTTP_ requests and responses
-  * `Repository` classes interface with the _database_ and take care of writing and reading data to/from persistent storage
-  * `Client` classes talk to other APIs, in our case it fetches _JSON_ via _HTTP_ from the openweathermap.org weather API
-
-
-  ```
-  Request  ┌────────── Spring Service ───────────┐
-   ─────────→ ┌─────────────┐    ┌─────────────┐ │   ┌─────────────┐
-   ←───────── │  Controller │ ←→ │  Repository │←──→ │  Database   │
-  Response │  └─────────────┘    └─────────────┘ │   └─────────────┘
-           │         ↓                           │
-           │    ┌──────────┐                     │
-           │    │  Client  │                     │
-           │    └──────────┘                     │
-           └─────────│───────────────────────────┘
-                     │
-                     ↓   
-                ┌──────────┐
-                │    ☁     │
-                │ Weather  │
-                │   API    │
-                └──────────┘
-  ```  
-
-## Test Layers
-The example applicationn shows different test layers according to the [Test Pyramid](https://martinfowler.com/bliki/TestPyramid.html).
+This project implements the **Test Pyramid** with comprehensive testing at all levels:
 
 ```
       ╱╲
-  End-to-End
+  E2E Tests
     ╱────╲
    ╱ Inte-╲
   ╱ gration╲
@@ -104,48 +40,298 @@ The example applicationn shows different test layers according to the [Test Pyra
 ──────────────
 ```
 
-The base of the pyramid is made up of unit tests. They should make the biggest part of your automated test suite.
+### Test Types
 
-The next layer, integration tests, test all places where your application serializes or deserializes data. Your service's REST API, Repositories or calling third-party services are good examples. This codebase contains example for all of these tests.
+| Test Level | Location | Purpose | Tools |
+|------------|----------|---------|-------|
+| **Unit Tests** | `backend/tests/unit/` | Test individual functions, models, serializers | pytest, factory-boy |
+| **Integration Tests** | `backend/tests/integration/` | Test API endpoints, database interactions | pytest-django, APIClient |
+| **Functional Tests** | `backend/tests/functional/` | Test user workflows, admin interface | pytest-django, Selenium |
+| **Frontend Tests** | `frontend/src/tests/` | Test Vue components and stores | Vitest, Vue Test Utils |
 
-```
- ╭┄┄┄┄┄┄┄╮      ┌──────────┐      ┌──────────┐
- ┆   ☁   ┆  ←→  │    ☕     │  ←→  │    💾     │
- ┆  Web  ┆      │  Spring  │      │ Database │
- ╰┄┄┄┄┄┄┄╯      │  Service │      └──────────┘
-                └──────────┘
+## 🚀 Quick Start
 
-  │    Controller     │      Repository      │
-  └─── Integration ───┴──── Integration ─────┘
+### Prerequisites
 
-  │                                          │
-  └────────────── Acceptance ────────────────┘               
-```
+- **Python 3.12+**
+- **Node.js 18+**
+- **PostgreSQL** (or SQLite for development)
+- **Git**
 
-```
- ┌─────────┐  ─┐
- │    ☁    │   │
- │ Weather │   │
- │   API   │   │
- │  Stub   │   │
- └─────────┘   │ Client
-      ↑        │ Integration
-      ↓        │ Test
- ┌──────────┐  │
- │    ☕     │  │
- │  Spring  │  │
- │  Service │  │
- └──────────┘ ─┘
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/hebamuh68/dj-vue-testing.git
+cd dj-vue-testing
 ```
 
-## Tools
-You can find lots of different tools, frameworks and libraries being used in the different examples:
+### 2. Backend Setup
 
-  * **Spring Boot**: application framework
-  * **JUnit**: test runner
-  * **Hamcrest Matchers**: assertions
-  * **Mockito**: test doubles (mocks, stubs)
-  * **MockMVC**: testing Spring MVC controllers
-  * **RestAssured**: testing the service end to end via HTTP
-  * **Wiremock**: provide HTTP stubs for downstream services
+```bash
+# Navigate to backend
+cd backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your database and API settings
+
+# Run migrations
+python manage.py migrate
+
+# Create superuser (optional)
+python manage.py createsuperuser
+
+# Start development server
+python manage.py runserver
+```
+
+### 3. Frontend Setup
+
+```bash
+# Navigate to frontend
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+### 4. Run Tests
+
+```bash
+# Backend tests
+cd backend
+python -m pytest tests/ -v
+
+# Frontend tests
+cd frontend
+npm run test
+
+# Run with coverage
+python -m pytest tests/ --cov=persons --cov-report=html
+```
+
+## 📁 Project Structure
+
+```
+dj-vue-testing/
+├── backend/                    # Django Backend
+│   ├── backend/               # Django project settings
+│   │   ├── backend/          # Django project settings
+│   │   ├── persons/          # Persons app
+│   │   │   ├── models.py     # Person model
+│   │   │   ├── serializers.py # DRF serializers
+│   │   │   ├── views.py      # API views
+│   │   │   └── tests/        # App-specific tests
+│   │   ├── weather/          # Weather app
+│   │   ├── tests/            # Test suite
+│   │   │   ├── unit/         # Unit tests
+│   │   │   ├── integration/  # Integration tests
+│   │   │   ├── functional/   # Functional tests
+│   │   │   └── conftest.py   # Shared fixtures
+│   │   ├── requirements.txt  # Python dependencies
+│   │   └── pytest.ini       # Pytest configuration
+│   ├── frontend/             # Vue.js Frontend
+│   │   ├── src/
+│   │   │   ├── components/   # Vue components
+│   │   │   ├── views/        # Page components
+│   │   │   ├── stores/       # Pinia stores
+│   │   │   ├── services/     # API services
+│   │   │   └── tests/        # Frontend tests
+│   │   ├── package.json      # Node dependencies
+│   │   └── vite.config.js    # Vite configuration
+│   ├── requirements.txt        # Root dependencies
+│   └── README.md             # This file
+```
+
+## 🧪 Testing Examples
+
+### Unit Tests (Models)
+
+```python
+# backend/tests/unit/test_models.py
+def test_person_str(sample_person):
+    """Test string representation of Person model."""
+    expected_str = f"{sample_person.first_name} {sample_person.last_name}"
+    assert str(sample_person) == expected_str
+```
+
+### Integration Tests (API)
+
+```python
+# backend/tests/integration/test_api.py
+def test_person_list_api(api_client, multiple_persons):
+    """Test person list API endpoint."""
+    response = api_client.get('/api/persons/')
+    assert response.status_code == 200
+    assert len(response.data) == len(multiple_persons)
+```
+
+### Functional Tests (User Workflows)
+
+```python
+# backend/tests/functional/test_user_flows.py
+def test_create_person_workflow(api_client):
+    """Test complete person creation workflow."""
+    data = {'first_name': 'John', 'last_name': 'Doe'}
+    response = api_client.post('/api/persons/', data)
+    assert response.status_code == 201
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create a `.env` file in the backend directory:
+
+```bash
+# Database
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=your_db_name
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_HOST=localhost
+DB_PORT=5432
+
+# Weather API
+WEATHER_API_KEY=your_openweathermap_api_key
+WEATHER_API_URL=https://api.openweathermap.org
+
+# Django
+SECRET_KEY=your_secret_key
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+### Database Setup
+
+For PostgreSQL:
+
+```bash
+# Using Docker
+docker run --name postgres-testing \
+  -e POSTGRES_DB=testdb \
+  -e POSTGRES_USER=testuser \
+  -e POSTGRES_PASSWORD=password \
+  -p 5432:5432 \
+  -d postgres:15
+
+# Or use the provided script
+./startDatabase.sh
+```
+
+## 📊 API Endpoints
+
+### Persons API
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/persons/` | List all persons |
+| `POST` | `/api/persons/` | Create a new person |
+| `GET` | `/api/persons/{id}/` | Get person details |
+| `PUT` | `/api/persons/{id}/` | Update person |
+| `DELETE` | `/api/persons/{id}/` | Delete person |
+
+### Weather API
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/weather/` | Get current weather |
+
+## 🛠️ Development Tools
+
+### Backend Tools
+
+- **Django 4.2+** - Web framework
+- **Django REST Framework** - API framework
+- **Pytest** - Testing framework
+- **Factory Boy** - Test data generation
+- **Coverage** - Code coverage
+- **Black** - Code formatting
+- **Flake8** - Linting
+
+### Frontend Tools
+
+- **Vue.js 3** - Frontend framework
+- **Vite** - Build tool
+- **Pinia** - State management
+- **Vue Router** - Routing
+- **Vitest** - Testing framework
+- **ESLint** - Linting
+- **Prettier** - Code formatting
+
+## 🚀 Deployment
+
+### Backend Deployment
+
+```bash
+# Production settings
+export DJANGO_SETTINGS_MODULE=backend.settings.production
+export DEBUG=False
+
+# Collect static files
+python manage.py collectstatic
+
+# Run migrations
+python manage.py migrate
+
+# Start with Gunicorn
+gunicorn backend.wsgi:application
+```
+
+### Frontend Deployment
+
+```bash
+# Build for production
+npm run build
+
+# Serve with nginx or similar
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Write tests for your changes
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+### Testing Guidelines
+
+- Write tests for all new features
+- Maintain test coverage above 80%
+- Use descriptive test names
+- Follow the test pyramid approach
+- Use fixtures for test data
+
+## 📚 Learning Resources
+
+- [Django Testing Documentation](https://docs.djangoproject.com/en/stable/topics/testing/)
+- [Pytest Documentation](https://docs.pytest.org/)
+- [Vue.js Testing Guide](https://vuejs.org/guide/scaling-up/testing.html)
+- [Test Pyramid by Martin Fowler](https://martinfowler.com/articles/practical-test-pyramid.html)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Inspired by the [Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html)
+- Built with modern Django and Vue.js best practices
+- Comprehensive testing examples for full-stack development
+
+---
+
+**Happy Testing! 🧪✨**
 
